@@ -20,6 +20,10 @@ db_connection = MongoClient(DB_CON_KEY)
 @app.get("/", response_class=HTMLResponse)
 async def read_item(request: Request):
     docs = db_connection.notes.notes.find({})
+    newDocs = []
     for doc in docs:
-        print(doc)
-    return templates.TemplateResponse("index.html", {"request": request})
+        newDocs.append({
+            "id": doc["_id"],
+            "note": doc["note"]
+        })
+    return templates.TemplateResponse("index.html", {"request": request, "newDocs": newDocs})

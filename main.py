@@ -1,29 +1,10 @@
-import os
-from dotenv import load_dotenv
-from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from pymongo import MongoClient
+from routes.note import note
 
-load_dotenv()
 
 app = FastAPI()
+app.include_router(note)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
-
-DB_CON_KEY = os.getenv('DB_KEY')
-db_connection = MongoClient(DB_CON_KEY)
-
-
-@app.get("/", response_class=HTMLResponse)
-async def read_item(request: Request):
-    docs = db_connection.notes.notes.find({})
-    newDocs = []
-    for doc in docs:
-        newDocs.append({
-            "id": doc["_id"],
-            "note": doc["note"]
-        })
-    return templates.TemplateResponse("index.html", {"request": request, "newDocs": newDocs})
